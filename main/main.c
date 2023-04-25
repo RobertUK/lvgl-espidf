@@ -21,7 +21,7 @@
 #include "esp_system.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
-
+#include "esp_timer.h"
 /* Littlevgl specific */
 #ifdef LV_LVGL_H_INCLUDE_SIMPLE
 #include "lvgl.h"
@@ -30,7 +30,7 @@
 #endif
 
 #include "lvgl_helpers.h"
-#include "display_port.h"
+//#include "display_port.h"
 
 #ifndef CONFIG_LV_TFT_DISPLAY_MONOCHROME
     #if defined CONFIG_LV_USE_DEMO_WIDGETS
@@ -84,23 +84,25 @@ static void guiTask(void *pvParameter) {
     lv_init();
 
     lv_disp_drv_init(&disp_drv);
-    disp_drv.flush_cb = st7789_flush;
+    disp_drv.flush_cb = ili9341_flush;
     disp_drv.rotated = LV_DISP_ROT_NONE;
 #if (LVGL_VERSION_MAJOR >= 8)
     disp_drv.drv_update_cb = st7789_update_cb;
 #endif
 
     /* Initialize SPI or I2C bus used by the drivers */
-    lvgl_interface_init();
-    lvgl_display_gpios_init();
+ //   lvgl_interface_init();
+  //  lvgl_display_gpios_init();
 
     /* Removed from lvgl_driver_init, that function is meant to initialize all
      * the needed peripherals */
-    st7789_init(&disp_drv);
+   // ili9341_init();   //   &disp_drv);
+
+    lvgl_driver_init();
     // disp_backlight_h *backlight = disp_backlight_init();
     // display_port_backlight(&disp_drv, backlight, 1);
 
-    size_t display_buffer_size = lvgl_get_display_buffer_size();
+    size_t display_buffer_size = CONFIG_LV_HOR_RES_MAX * 10; //lvgl_get_display_buffer_size();
     lv_color_t* buf1 = heap_caps_malloc(display_buffer_size * sizeof(lv_color_t), MALLOC_CAP_DMA);
     assert(buf1 != NULL);
 
